@@ -32,48 +32,98 @@ class Player {
         }
     }
 
-    static class Table {
+    static class Grid {
 
-        Map<Cell, Field> table;
+        final int numberOfRows;
+        final int numberOfColumns;
 
-        void addLine(int row, String line){
-            for(int i = 0; i < NUMBER_OF_COLUNMS; i++){
-                table
+        private final Map<Cell, Field> grid = new HashMap<>();
+
+        Grid(int numberOfRows, int numberOfColumns) {
+            this.numberOfRows = numberOfRows;
+            this.numberOfColumns = numberOfColumns;
+        }
+
+        void parse(List<String> lines) {
+            if (lines.size() != numberOfRows) {
+                throw new IllegalStateException("Expected " + numberOfRows + " rows, " +
+                        "but found " + lines.size() + " instead.");
+            }
+
+            for (int i = 0; i < numberOfRows; i++) {
+                String line = lines.get(i);
+
+                if (line.length() != numberOfColumns) {
+                    throw new IllegalStateException("Expected " + numberOfColumns + " columns, " +
+                            "but found " + line.length() + " instead.");
+                }
+
+                for (int j = 0; j < numberOfColumns; j++) {
+                    Cell cell = new Cell(i, j);
+                    grid.put(cell, Field.of(line.charAt(j)));
+                }
             }
         }
-    }
 
-    static class Row {
-        final int i;
-        final List<Cell> cells;
-
-        Row(int i, List<Cell> cells) {
-            this.i = i;
-            this.cells = cells;
+        Field getField(int i, int j) {
+            return grid.get(new Cell(i, j));
         }
     }
 
-    static class Column {
-        final int j;
-        final List<Cell> cells;
+    private static class Cell {
+        final int row;
+        final int column;
 
-        Column(int j, List<Cell> cells){
-            this.j = j;
-            this.cells = cells;
-        }
-    }
-
-    static class Cell {
-        final Row row;
-        final Column column;
-
-        Cell(Row row, Column column){
+        Cell(int row, int column) {
             this.row = row;
             this.column = column;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Cell cell = (Cell) o;
+            return Objects.equals(row, cell.row) &&
+                    Objects.equals(column, cell.column);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(row, column);
         }
     }
 
     static class Field {
+        enum Type {
+            COLOR, SKULL, EMPTY
+        }
 
+        private final char value;
+        private final Type type;
+
+        Field(char value, Type type) {
+            this.value = value;
+            this.type = type;
+        }
+
+        char getValue() {
+            return value;
+        }
+
+        Type getType() {
+            return type;
+        }
+
+        static Field of(char value) {
+            switch (value) {
+                case '.':
+                    return new Field(value, Type.EMPTY);
+                case '0':
+                    return new Field(value, Type.SKULL);
+                default:
+                    return new Field(value, Type.COLOR);
+            }
+        }
     }
 }
