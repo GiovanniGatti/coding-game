@@ -14,21 +14,44 @@ class Player {
 
         // game loop
         while (true) {
+            List<Block> next = new ArrayList<>();
+
             for (int i = 0; i < 8; i++) {
-                int colorA = in.nextInt(); // color of the first block
-                int colorB = in.nextInt(); // color of the attached block
+                int colorA = in.nextInt();
+                int colorB = in.nextInt();
+                next.add(new Block(colorA, colorB));
             }
+
+            // Opponent grid
             for (int i = 0; i < 12; i++) {
                 String row = in.next();
             }
+
+            // My current grid
             for (int i = 0; i < 12; i++) {
-                String row = in.next(); // One line of the map ('.' = empty, '0' = skull block, '1' to '5' = colored block)
+                String row = in.next();
             }
 
-            // Write an action using System.out.println()
-            // To debug: System.err.println("Debug messages...");
+            // TODO
 
             System.out.println("0"); // "x": the column in which to drop your blocks
+        }
+    }
+
+    private static class Block {
+        private final int a, b;
+
+        Block(int a, int b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        public int getA() {
+            return a;
+        }
+
+        public int getB() {
+            return b;
         }
     }
 
