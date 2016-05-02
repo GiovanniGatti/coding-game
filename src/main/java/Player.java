@@ -1,12 +1,13 @@
 import java.util.*;
-import java.io.*;
-import java.math.*;
 
 /**
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
 class Player {
+
+    static final int NUMBER_OF_COLUNMS = 6;
+    static final int NUMBER_OF_ROWS = 12;
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
@@ -29,5 +30,50 @@ class Player {
 
             System.out.println("0"); // "x": the column in which to drop your blocks
         }
+    }
+
+    static class Table {
+
+        Map<Cell, Field> table;
+
+        void addLine(int row, String line){
+            for(int i = 0; i < NUMBER_OF_COLUNMS; i++){
+                table
+            }
+        }
+    }
+
+    static class Row {
+        final int i;
+        final List<Cell> cells;
+
+        Row(int i, List<Cell> cells) {
+            this.i = i;
+            this.cells = cells;
+        }
+    }
+
+    static class Column {
+        final int j;
+        final List<Cell> cells;
+
+        Column(int j, List<Cell> cells){
+            this.j = j;
+            this.cells = cells;
+        }
+    }
+
+    static class Cell {
+        final Row row;
+        final Column column;
+
+        Cell(Row row, Column column){
+            this.row = row;
+            this.column = column;
+        }
+    }
+
+    static class Field {
+
     }
 }
