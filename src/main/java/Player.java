@@ -1,7 +1,7 @@
 import java.util.*;
 
 /**
- * Auto-generated code below aims at helping you parse
+ * Auto-generated code below aims at helping you parseLine
  * the standard input according to the problem statement.
  **/
 class Player {
@@ -56,35 +56,23 @@ class Player {
     }
 
     static class Grid {
-
-        final int numberOfRows;
         final int numberOfColumns;
 
         private final Map<Cell, Field> grid = new HashMap<>();
 
-        Grid(int numberOfRows, int numberOfColumns) {
-            this.numberOfRows = numberOfRows;
+        Grid(int numberOfColumns) {
             this.numberOfColumns = numberOfColumns;
         }
 
-        void parse(List<String> lines) {
-            if (lines.size() != numberOfRows) {
-                throw new IllegalStateException("Expected " + numberOfRows + " rows, " +
-                        "but found " + lines.size() + " instead.");
+        void parseLine(int i, String line) {
+            if (line.length() != numberOfColumns) {
+                throw new IllegalStateException("Expected " + numberOfColumns + " columns, " +
+                        "but found " + line.length() + " instead.");
             }
 
-            for (int i = 0; i < numberOfRows; i++) {
-                String line = lines.get(i);
-
-                if (line.length() != numberOfColumns) {
-                    throw new IllegalStateException("Expected " + numberOfColumns + " columns, " +
-                            "but found " + line.length() + " instead.");
-                }
-
-                for (int j = 0; j < numberOfColumns; j++) {
-                    Cell cell = new Cell(i, j);
-                    grid.put(cell, Field.of(line.charAt(j)));
-                }
+            for (int j = 0; j < numberOfColumns; j++) {
+                Cell cell = new Cell(i, j);
+                grid.put(cell, Field.of(line.charAt(j)));
             }
         }
 

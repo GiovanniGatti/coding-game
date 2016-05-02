@@ -19,7 +19,7 @@ class GridAssert extends AbstractAssert<GridAssert, Player.Grid> {
     public void isEqualTo(String... lines) {
         isNotNull();
 
-        for (int i = 0; i < actual.numberOfRows; i++) {
+        for (int i = 0; i < lines.length; i++) {
             for (int j = 0; j < actual.numberOfColumns; j++) {
                 char expected = lines[i].charAt(j);
                 Player.Field field = actual.getField(i, j);
@@ -39,7 +39,7 @@ class GridAssert extends AbstractAssert<GridAssert, Player.Grid> {
 
         builder.append("but found\n");
 
-        for (int i = 0; i < grid.numberOfRows; i++) {
+        for (int i = 0; i < lines.length; i++) {
             for (int j = 0; j < grid.numberOfColumns; j++) {
                 builder.append(grid.getField(i, j));
             }

@@ -1,10 +1,7 @@
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
 import org.assertj.core.api.WithAssertions;
-import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.List;
 
 
 @RunWith(HierarchicalContextRunner.class)
@@ -13,38 +10,15 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
     public class GridTest {
 
         @Test
-        public void throw_ISE_when_exceeding_rows() {
-            List<String> lines = Lists.newArrayList(".", ".");
-
-            assertThatThrownBy(() -> new Player.Grid(1, 1).parse(lines))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("Expected 1 rows, but found 2 instead.");
-        }
-
-        @Test
-        public void throw_ISE_when_missing_rows() {
-            List<String> lines = Lists.newArrayList(".");
-
-            assertThatThrownBy(() -> new Player.Grid(2, 1).parse(lines))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("Expected 2 rows, but found 1 instead.");
-        }
-
-
-        @Test
         public void throw_ISE_when_exceeding_columns() {
-            List<String> lines = Lists.newArrayList("..");
-
-            assertThatThrownBy(() -> new Player.Grid(1, 1).parse(lines))
+            assertThatThrownBy(() -> new Player.Grid(1).parseLine(0, ".."))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Expected 1 columns, but found 2 instead.");
         }
 
         @Test
         public void throw_ISE_when_missing_columns() {
-            List<String> lines = Lists.newArrayList(".");
-
-            assertThatThrownBy(() -> new Player.Grid(1, 2).parse(lines))
+            assertThatThrownBy(() -> new Player.Grid(2).parseLine(0, "."))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Expected 2 columns, but found 1 instead.");
         }
@@ -52,18 +26,15 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
         @Test
         public void load_table() {
-            List<String> lines = Lists.newArrayList(
-                    "....",
-                    ".1..",
-                    ".02.");
-
-            Player.Grid grid = new Player.Grid(3, 4);
-            grid.parse(lines);
+            Player.Grid grid = new Player.Grid(4);
+            grid.parseLine(0, "..0.");
+            grid.parseLine(1, ".1..");
+            grid.parseLine(2, ".22.");
 
             assertThat(grid).isEqualTo(
-                    "....",
+                    "..0.",
                     ".1..",
-                    ".02.");
+                    ".22.");
         }
 
     }
