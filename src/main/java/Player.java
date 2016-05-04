@@ -1,5 +1,14 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.Set;
 
 /**
  * Auto-generated code below aims at helping you parseLine
@@ -166,25 +175,71 @@ final class Player {
         }
 
         void remove(Cell cell) {
-            //TODO: deal with skull blocks
-
+            int row = cell.row;
             int column = cell.column;
 
-            if (grid.get(cell).getType() == Field.Type.EMPTY) {
+            if (!cell.isInsideGrid(this)) {
+                throw new IllegalStateException("Cell " + cell + " outside grid range.");
+            }
+
+            Field currentField = grid.get(cell);
+            Field.Type currentType = currentField.getType();
+
+            if (currentType == Field.Type.EMPTY) {
                 throw new IllegalStateException("Cannot remove an empty cell " + cell);
             }
 
-            // If removing topper cell
-            if (cell.row == 0) {
-                grid.put(new Cell(0, column), Field.empty());
+            // Kill surrounding skull blocks
+            if (currentType == Field.Type.COLOR) {
+
+                // kills upper cell
+                if (row - 1 >= 0) {
+                    Cell upper = new Cell(row - 1, column);
+                    if (grid.get(upper).getType() == Field.Type.SKULL) {
+                        remove(upper);
+                    }
+                }
+
+                // kills lower cell
+                if (row + 1 < numberOfLines) {
+                    Cell lower = new Cell(row + 1, column);
+                    if (grid.get(lower).getType() == Field.Type.SKULL) {
+                        remove(lower);
+                    }
+                }
+
+                // kills left cell
+                if (column - 1 >= 0) {
+                    Cell left = new Cell(row, column - 1);
+                    if (grid.get(left).getType() == Field.Type.SKULL) {
+                        remove(left);
+                    }
+                }
+
+                // kills left cell
+                if (column + 1 < numberOfColumns) {
+                    Cell right = new Cell(row, column + 1);
+                    if (grid.get(right).getType() == Field.Type.SKULL) {
+                        remove(right);
+                    }
+                }
             }
 
-            for (int i = cell.row; i > 0; i--) {
+            for (int i = row; i >= 0; i--) {
                 Cell current = new Cell(i, column);
                 Cell upper = new Cell(i - 1, column);
+                Field field = grid.get(current);
                 Field upperField = grid.get(upper);
-                //Field is immutable
+
+                if (!upper.isInsideGrid(this)) {
+                    upperField = Field.empty();
+                }
+
+                // Field is immutable
                 grid.put(current, upperField);
+                mirrorGrid.get(field).remove(current);
+                mirrorGrid.putIfAbsent(upperField, new HashSet<>());
+                mirrorGrid.get(upperField).add(current);
 
                 if (upperField.getType() == Field.Type.EMPTY) {
                     break;
@@ -213,7 +268,7 @@ final class Player {
         }
 
         private static Optional<Set<Cell>> findGroup(List<Cell> cells) {
-            //Optimization when it is known that no group larger than 4 may exists
+            // Optimization when it is known that no group larger than 4 may exists
             if (cells.size() < 4) {
                 return Optional.empty();
             }
@@ -247,7 +302,7 @@ final class Player {
             }
 
             return groups.stream()
-                    //Minimum number of inline elements to form a group
+                    // Minimum number of inline elements to form a group
                     .filter(g -> g.size() >= 4)
                     .findFirst();
         }
@@ -294,6 +349,11 @@ final class Player {
             return another.row == row && (another.column - 1 == column || another.column + 1 == column);
         }
 
+        boolean isInsideGrid(Grid grid) {
+            return (row >= 0 && row < grid.numberOfLines)
+                    && (column >= 0 && column < grid.numberOfColumns);
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -318,7 +378,7 @@ final class Player {
         }
     }
 
-    //Immutable class
+    // Immutable class
     static class Field {
 
         enum Type {
@@ -351,18 +411,18 @@ final class Player {
 
         static Field of(char value) {
             switch (value) {
-                case '.':
-                    return new Field(value, Type.EMPTY);
-                case '0':
-                    return new Field(value, Type.SKULL);
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                    return new Field(value, Type.COLOR);
-                default:
-                    throw new IllegalArgumentException("Unknown value: " + value);
+            case '.':
+                return new Field(value, Type.EMPTY);
+            case '0':
+                return new Field(value, Type.SKULL);
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+                return new Field(value, Type.COLOR);
+            default:
+                throw new IllegalArgumentException("Unknown value: " + value);
             }
         }
 
