@@ -218,6 +218,21 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(0, "2");
                 grid.parseLine(1, "0");
 
+                grid.remove(new Player.Cell(0, 0));
+
+                assertThat(grid).isEqualTo(
+                        ".",
+                        ".");
+
+                assertThat(grid.getCells('.')).containsExactlyInAnyOrder(new Player.Cell(0, 0), new Player.Cell(1, 0));
+            }
+
+            @Test
+            public void drop_upper_fields_when_killing_skull_block() {
+                Player.Grid grid = new Player.Grid(2, 1);
+                grid.parseLine(0, "2");
+                grid.parseLine(1, "0");
+
                 grid.remove(new Player.Cell(1, 0));
 
                 assertThat(grid).isEqualTo(
@@ -249,7 +264,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
             }
 
             @Test
-            public void group_block_after_placement() {
+            public void group_block_after_placement__square() {
                 Player.Grid grid = new Player.Grid(3, 4);
                 grid.parseLine(0, "....");
                 grid.parseLine(1, "..2.");
@@ -264,31 +279,116 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                         "....",
                         "....");
             }
+
+            @Test
+            public void group_block_after_placement__lineup() {
+                Player.Grid grid = new Player.Grid(4, 1);
+                grid.parseLine(0, ".");
+                grid.parseLine(1, ".");
+                grid.parseLine(2, "2");
+                grid.parseLine(3, "2");
+
+                Player.Block block = new Player.Block(2, 2);
+
+                Player.ScoreEvaluation score = grid.place(block, 0);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        ".",
+                        ".",
+                        ".",
+                        ".");
+            }
+
+            @Test
+            public void group_block_after_placement__horizontal() {
+                Player.Grid grid = new Player.Grid(2, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, ".222");
+
+                Player.Block block = new Player.Block(2, 2);
+
+                Player.ScoreEvaluation score = grid.place(block, 0);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "....",
+                        "....");
+            }
+
+            @Test
+            public void group_block_after_placement__s() {
+                Player.Grid grid = new Player.Grid(4, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, "..2.");
+                grid.parseLine(2, "..2.");
+                grid.parseLine(3, "..1.");
+
+                Player.Block block = new Player.Block(2, 2);
+
+                Player.ScoreEvaluation score = grid.place(block, 1);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "....",
+                        "....",
+                        "....",
+                        "..1.");
+            }
+
+            @Test
+            public void group_block_after_placement__cross() {
+                Player.Grid grid = new Player.Grid(4, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, "....");
+                grid.parseLine(2, ".2.2");
+                grid.parseLine(3, ".121");
+
+                Player.Block block = new Player.Block(2, 2);
+
+                Player.ScoreEvaluation score = grid.place(block, 2);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "....",
+                        "....",
+                        "....",
+                        ".1.1");
+            }
+
+            @Test
+            public void group_block_after_placement_destroying_skull_blocks() {
+                Player.Grid grid = new Player.Grid(4, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, "..2.");
+                grid.parseLine(2, "0.20");
+                grid.parseLine(3, "0.00");
+
+                Player.Block block = new Player.Block(2, 2);
+
+                Player.ScoreEvaluation score = grid.place(block, 1);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "....",
+                        "....",
+                        "....",
+                        "...0");
+            }
+
+            @Test
+            public void group_chaining() {
+                Player.Grid grid = new Player.Grid(4, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, ".1..");
+                grid.parseLine(2, ".2..");
+                grid.parseLine(3, "1211");
+
+                Player.Block block = new Player.Block(2, 2);
+
+                Player.ScoreEvaluation score = grid.place(block, 2);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "....",
+                        "....",
+                        "....",
+                        "....");
+            }
         }
     }
-    //
-    // @Test
-    // public void do_match_vertical_line_group() {
-    // Player.Grid grid = new Player.Grid(4);
-    // grid.parseLine(0, "..2.");
-    // grid.parseLine(1, "..2.");
-    // grid.parseLine(2, "..2.");
-    // grid.parseLine(3, "..2.");
-    // }
-    //
-    // @Test
-    // public void do_match_horizontal_line_group() {
-    // Player.Grid grid = new Player.Grid(4);
-    // grid.parseLine(0, "....");
-    // grid.parseLine(1, "2222");
-    // }
-    //
-    // @Test
-    // public void do_match_s_line_group() {
-    // Player.Grid grid = new Player.Grid(4);
-    // grid.parseLine(0, "....");
-    // grid.parseLine(1, "....");
-    // grid.parseLine(2, "....");
-    // grid.parseLine(3, "2222");
-    // }
 }

@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,10 +49,6 @@ final class Player {
             System.out.println("0"); // "x": the column in which to drop your blocks
         }
     }
-
-    // TODO: fix this method
-    // 1- should not mutate current grid
-    // 2- maybe make it part of the Grid class?
 
     static class ScoreEvaluation {
         private final Grid nextState;
@@ -149,34 +147,37 @@ final class Player {
             return new Cell(numberOfLines - 1, column);
         }
 
-        // TODO: deal with grouping
-        // TODO: count score
-        // TODO: worst score if placing outside borders
         ScoreEvaluation place(Block block, int pos) {
             Grid next = new Grid(this);
-            Cell cell = next.nextAvailableCell(pos);
-            Cell upper = new Cell(cell.row - 1, cell.column);
+
+            Cell lower = next.nextAvailableCell(pos);
+            Field lowerField = grid.get(lower);
+
+            Cell upper = new Cell(lower.getRow() - 1, lower.getColumn());
+            Field upperField = grid.get(upper);
 
             Field a = Field.of(block.getA());
             Field b = Field.of(block.getB());
 
-            next.grid.put(cell, b);
+            next.grid.put(lower, b);
             next.grid.put(upper, a);
 
             next.mirrorGrid.putIfAbsent(b, new HashSet<>());
-            next.mirrorGrid.get(b).add(cell);
+            next.mirrorGrid.get(lowerField).remove(lower);
+            next.mirrorGrid.get(b).add(lower);
 
             next.mirrorGrid.putIfAbsent(a, new HashSet<>());
+            next.mirrorGrid.get(upperField).remove(upper);
             next.mirrorGrid.get(a).add(upper);
 
-            group(next);
+            int score = group(next);
 
-            return new ScoreEvaluation(next, 1);
+            return new ScoreEvaluation(next, score);
         }
 
         void remove(Cell cell) {
-            int row = cell.row;
-            int column = cell.column;
+            int row = cell.getRow();
+            int column = cell.getColumn();
 
             if (!cell.isInsideGrid(this)) {
                 throw new IllegalStateException("Cell " + cell + " outside grid range.");
@@ -204,7 +205,10 @@ final class Player {
                 if (row + 1 < numberOfLines) {
                     Cell lower = new Cell(row + 1, column);
                     if (grid.get(lower).getType() == Field.Type.SKULL) {
-                        remove(lower);
+                        grid.put(lower, Field.empty());
+                        mirrorGrid.get(Field.skull()).remove(lower);
+                        mirrorGrid.putIfAbsent(Field.empty(), new HashSet<>());
+                        mirrorGrid.get(Field.empty()).add(lower);
                     }
                 }
 
@@ -229,10 +233,12 @@ final class Player {
                 Cell current = new Cell(i, column);
                 Cell upper = new Cell(i - 1, column);
                 Field field = grid.get(current);
-                Field upperField = grid.get(upper);
+                Field upperField;
 
                 if (!upper.isInsideGrid(this)) {
                     upperField = Field.empty();
+                } else {
+                    upperField = grid.get(upper);
                 }
 
                 // Field is immutable
@@ -248,12 +254,25 @@ final class Player {
         }
 
         private static int group(Grid grid) {
-            Optional<Set<Cell>> maybeGroup = findGroup(new ArrayList<>(grid.mirrorGrid.get(Field.of('2'))));
 
-            if (maybeGroup.isPresent()) {
-                Set<Cell> cell = maybeGroup.get();
+            for (char c : Field.COLORS) {
+                Set<Cell> set = grid.mirrorGrid.get(Field.of(c));
 
-                return groupScore(cell.size());
+                if (set != null) {
+                    Optional<Set<Cell>> maybeGroup = findGroup(new ArrayList<>(set));
+
+                    if (maybeGroup.isPresent()) {
+                        Set<Cell> group = maybeGroup.get();
+
+                        group.stream()
+                                .sorted(Comparator.comparingInt(Cell::getRow)
+                                        .thenComparing(Comparator.comparingInt(Cell::getColumn)))
+                                .forEachOrdered(grid::remove);
+
+                        // Test chaining effect
+                        return groupScore(group.size()) + 2 * group(grid);
+                    }
+                }
             }
 
             return 0;
@@ -264,7 +283,7 @@ final class Player {
                 return 0;
             }
 
-            return ((int) ((1 / 6) * Math.pow(groupSize, 2) + (1 / 3) * ((double) groupSize)));
+            return ((int) ((1.0 / 6) * Math.pow(groupSize, 2) + (1.0 / 3) * groupSize));
         }
 
         private static Optional<Set<Cell>> findGroup(List<Cell> cells) {
@@ -278,19 +297,20 @@ final class Player {
             for (int i = 0; i < cells.size() - 1; i++) {
                 Cell current = cells.get(i);
 
-                for (int j = i; j < cells.size(); j++) {
+                for (int j = i + 1; j < cells.size(); j++) {
                     Cell next = cells.get(j);
 
                     if (current.isNeighbor(next)) {
 
                         Optional<Set<Cell>> maybeInGroup =
                                 groups.stream()
-                                        .filter(g -> g.contains(current))
+                                        .filter(g -> g.contains(current) || g.contains(next))
                                         .findFirst();
 
                         if (maybeInGroup.isPresent()) {
                             Set<Cell> group = maybeInGroup.get();
                             group.add(next);
+                            group.add(current);
                         } else {
                             Set<Cell> group = new HashSet<>();
                             group.add(current);
@@ -333,8 +353,8 @@ final class Player {
     }
 
     static class Cell {
-        final int row;
-        final int column;
+        private final int row;
+        private final int column;
 
         Cell(int row, int column) {
             this.row = row;
@@ -354,6 +374,14 @@ final class Player {
                     && (column >= 0 && column < grid.numberOfColumns);
         }
 
+        int getRow() {
+            return row;
+        }
+
+        int getColumn() {
+            return column;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -363,8 +391,8 @@ final class Player {
                 return false;
             }
             Cell cell = (Cell) o;
-            return Objects.equals(row, cell.row) &&
-                    Objects.equals(column, cell.column);
+            return Objects.equals(row, cell.getRow()) &&
+                    Objects.equals(column, cell.getColumn());
         }
 
         @Override
@@ -384,6 +412,10 @@ final class Player {
         enum Type {
             COLOR, SKULL, EMPTY
         }
+
+        static Set<Character> COLORS = Collections.unmodifiableSet(
+                new HashSet<>(
+                        Arrays.asList('1', '2', '3', '4', '5')));
 
         private final char value;
         private final Type type;
@@ -412,9 +444,9 @@ final class Player {
         static Field of(char value) {
             switch (value) {
             case '.':
-                return new Field(value, Type.EMPTY);
+                return empty();
             case '0':
-                return new Field(value, Type.SKULL);
+                return skull();
             case '1':
             case '2':
             case '3':
@@ -428,6 +460,10 @@ final class Player {
 
         static Field empty() {
             return new Field('.', Field.Type.EMPTY);
+        }
+
+        static Field skull() {
+            return new Field('0', Type.SKULL);
         }
 
         @Override
