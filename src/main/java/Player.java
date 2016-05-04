@@ -1,13 +1,5 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Scanner;
-import java.util.Set;
 
 /**
  * Auto-generated code below aims at helping you parseLine
@@ -60,11 +52,11 @@ final class Player {
             this.score = score;
         }
 
-        public Grid getNextState() {
+        Grid getNextState() {
             return nextState;
         }
 
-        public int getScore() {
+        int getScore() {
             return score;
         }
     }
@@ -77,11 +69,11 @@ final class Player {
             this.b = b;
         }
 
-        public int getA() {
+        int getA() {
             return a;
         }
 
-        public int getB() {
+        int getB() {
             return b;
         }
     }
@@ -150,6 +142,7 @@ final class Player {
 
         // TODO: deal with grouping
         // TODO: count score
+        // TODO: worst score if placing outside borders
         ScoreEvaluation place(Block block, int pos) {
             Grid next = new Grid(this);
             Cell cell = next.nextAvailableCell(pos);
@@ -172,15 +165,91 @@ final class Player {
             return new ScoreEvaluation(next, 1);
         }
 
+        void remove(Cell cell) {
+            //TODO: deal with skull blocks
+
+            int column = cell.column;
+
+            if (grid.get(cell).getType() == Field.Type.EMPTY) {
+                throw new IllegalStateException("Cannot remove an empty cell " + cell);
+            }
+
+            // If removing topper cell
+            if (cell.row == 0) {
+                grid.put(new Cell(0, column), Field.empty());
+            }
+
+            for (int i = cell.row; i > 0; i--) {
+                Cell current = new Cell(i, column);
+                Cell upper = new Cell(i - 1, column);
+                Field upperField = grid.get(upper);
+                //Field is immutable
+                grid.put(current, upperField);
+
+                if (upperField.getType() == Field.Type.EMPTY) {
+                    break;
+                }
+            }
+        }
+
         private static int group(Grid grid) {
-            System.out.println(grid.mirrorGrid.get(Field.of('2')));
+            Optional<Set<Cell>> maybeGroup = findGroup(new ArrayList<>(grid.mirrorGrid.get(Field.of('2'))));
+
+            if (maybeGroup.isPresent()) {
+                Set<Cell> cell = maybeGroup.get();
+
+                return groupScore(cell.size());
+            }
+
             return 0;
         }
 
-        // TODO: solution may come from graph structure
-        private static Set<Cell> findGroup(Set<Cell> maybeGroup) {
+        private static int groupScore(int groupSize) {
+            if (groupSize < 4) {
+                return 0;
+            }
 
-            return new HashSet<>();
+            return ((int) ((1 / 6) * Math.pow(groupSize, 2) + (1 / 3) * ((double) groupSize)));
+        }
+
+        private static Optional<Set<Cell>> findGroup(List<Cell> cells) {
+            //Optimization when it is known that no group larger than 4 may exists
+            if (cells.size() < 4) {
+                return Optional.empty();
+            }
+
+            List<Set<Cell>> groups = new ArrayList<>();
+
+            for (int i = 0; i < cells.size() - 1; i++) {
+                Cell current = cells.get(i);
+
+                for (int j = i; j < cells.size(); j++) {
+                    Cell next = cells.get(j);
+
+                    if (current.isNeighbor(next)) {
+
+                        Optional<Set<Cell>> maybeInGroup =
+                                groups.stream()
+                                        .filter(g -> g.contains(current))
+                                        .findFirst();
+
+                        if (maybeInGroup.isPresent()) {
+                            Set<Cell> group = maybeInGroup.get();
+                            group.add(next);
+                        } else {
+                            Set<Cell> group = new HashSet<>();
+                            group.add(current);
+                            group.add(next);
+                            groups.add(group);
+                        }
+                    }
+                }
+            }
+
+            return groups.stream()
+                    //Minimum number of inline elements to form a group
+                    .filter(g -> g.size() >= 4)
+                    .findFirst();
         }
 
         private static Map<Cell, Field> deepCopy(Map<Cell, Field> actual) {
@@ -217,6 +286,14 @@ final class Player {
             this.column = column;
         }
 
+        boolean isNeighbor(Cell another) {
+            if (another.column == column) {
+                return another.row - 1 == row || another.row + 1 == row;
+            }
+
+            return another.row == row && (another.column - 1 == column || another.column + 1 == column);
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -237,14 +314,11 @@ final class Player {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("Cell{");
-            sb.append("row=").append(row);
-            sb.append(", column=").append(column);
-            sb.append('}');
-            return sb.toString();
+            return "(" + row + ", " + column + ")";
         }
     }
 
+    //Immutable class
     static class Field {
 
         enum Type {
@@ -277,19 +351,23 @@ final class Player {
 
         static Field of(char value) {
             switch (value) {
-            case '.':
-                return new Field(value, Type.EMPTY);
-            case '0':
-                return new Field(value, Type.SKULL);
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-                return new Field(value, Type.COLOR);
-            default:
-                throw new IllegalArgumentException("Unknown value: " + value);
+                case '.':
+                    return new Field(value, Type.EMPTY);
+                case '0':
+                    return new Field(value, Type.SKULL);
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                    return new Field(value, Type.COLOR);
+                default:
+                    throw new IllegalArgumentException("Unknown value: " + value);
             }
+        }
+
+        static Field empty() {
+            return new Field('.', Field.Type.EMPTY);
         }
 
         @Override
