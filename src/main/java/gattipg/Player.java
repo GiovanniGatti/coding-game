@@ -1,3 +1,5 @@
+package gattipg;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,14 +14,10 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 
-/**
- * Auto-generated code below aims at helping you parseLine
- * the standard input according to the problem statement.
- **/
 final class Player {
 
-    static final int NUMBER_OF_COLUNMS = 6;
-    static final int NUMBER_OF_ROWS = 12;
+    private static final int NUMBER_OF_COLUMNS = 6;
+    private static final int NUMBER_OF_ROWS = 12;
 
     public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
@@ -27,6 +25,7 @@ final class Player {
         // game loop
         while (true) {
             List<Block> next = new ArrayList<>();
+            Grid grid = new Grid(NUMBER_OF_ROWS, NUMBER_OF_COLUMNS);
 
             for (int i = 0; i < 8; i++) {
                 int colorA = in.nextInt();
@@ -42,11 +41,87 @@ final class Player {
             // My current grid
             for (int i = 0; i < 12; i++) {
                 String row = in.next();
+                grid.parseLine(i, row);
             }
 
-            // TODO
+            //Performance issues when computing more than 3 blocks
+            List<Action> actions = GamePlanner.run(grid, next.subList(0, 4));
 
-            System.out.println("0"); // "x": the column in which to drop your blocks
+            //Game is lost, do anything...
+            if (actions.isEmpty()) {
+                System.out.println("0");
+            }
+
+            System.out.println(String.valueOf(actions.get(0).getPosition()));
+        }
+    }
+
+    static class GamePlanner {
+
+        //BFS - brute force best case scenario with single player
+        static List<Action> run(Grid currentState, List<Block> incomingBlocks) {
+
+            if (incomingBlocks.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            List<List<Action>> simulations = new ArrayList<>();
+
+            for (int j = 0; j < currentState.getNumberOfColumns(); j++) {
+                ScoreEvaluation evaluation = currentState.place(incomingBlocks.get(0), j);
+
+                if (evaluation.getScore() != Integer.MIN_VALUE) {
+
+                    List<Action> bestOutcome =
+                            run(evaluation.getNextState(),
+                                    incomingBlocks.subList(1, incomingBlocks.size()));
+
+                    bestOutcome.add(0, new Action(evaluation, j));
+
+                    simulations.add(bestOutcome);
+                }
+            }
+
+            int highestScore = Integer.MIN_VALUE;
+            List<Action> actionsToPerform = new ArrayList<>();
+
+            for (List<Action> simulation : simulations) {
+                int accumulatedScore = 0;
+
+                for (Action action : simulation) {
+                    accumulatedScore += action.getEvaluation().getScore();
+                }
+
+                if (accumulatedScore > highestScore) {
+                    highestScore = accumulatedScore;
+                    actionsToPerform = simulation;
+                }
+            }
+
+            return actionsToPerform;
+        }
+    }
+
+    static class Action {
+        private final ScoreEvaluation evaluation;
+        private final int position;
+
+        Action(ScoreEvaluation evaluation, int position) {
+            this.evaluation = evaluation;
+            this.position = position;
+        }
+
+        ScoreEvaluation getEvaluation() {
+            return evaluation;
+        }
+
+        int getPosition() {
+            return position;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(position);
         }
     }
 
@@ -86,8 +161,8 @@ final class Player {
     }
 
     static class Grid {
-        final int numberOfLines;
-        final int numberOfColumns;
+        private final int numberOfLines;
+        private final int numberOfColumns;
 
         private final Map<Cell, Field> grid;
         private final Map<Field, Set<Cell>> mirrorGrid;
@@ -155,6 +230,10 @@ final class Player {
 
             Cell upper = new Cell(lower.getRow() - 1, lower.getColumn());
             Field upperField = grid.get(upper);
+
+            if (!lower.isInsideGrid(this) || !upper.isInsideGrid(this)) {
+                return new ScoreEvaluation(null, Integer.MIN_VALUE);
+            }
 
             Field a = Field.of(block.getA());
             Field b = Field.of(block.getB());
@@ -327,6 +406,14 @@ final class Player {
                     .findFirst();
         }
 
+        int getNumberOfColumns() {
+            return numberOfColumns;
+        }
+
+        int getNumberOfLines() {
+            return numberOfLines;
+        }
+
         private static Map<Cell, Field> deepCopy(Map<Cell, Field> actual) {
             Map<Cell, Field> copy = new HashMap<>();
 
@@ -443,18 +530,18 @@ final class Player {
 
         static Field of(char value) {
             switch (value) {
-            case '.':
-                return empty();
-            case '0':
-                return skull();
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-                return new Field(value, Type.COLOR);
-            default:
-                throw new IllegalArgumentException("Unknown value: " + value);
+                case '.':
+                    return empty();
+                case '0':
+                    return skull();
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                    return new Field(value, Type.COLOR);
+                default:
+                    throw new IllegalArgumentException("Unknown value: " + value);
             }
         }
 

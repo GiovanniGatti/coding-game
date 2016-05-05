@@ -1,8 +1,12 @@
+package gattipg;
+
+import de.bechte.junit.runners.context.HierarchicalContextRunner;
 import org.assertj.core.api.WithAssertions;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import de.bechte.junit.runners.context.HierarchicalContextRunner;
+import java.util.List;
 
 @RunWith(HierarchicalContextRunner.class)
 public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertions {
@@ -388,6 +392,73 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                         "....",
                         "....",
                         "....");
+            }
+
+            @Test
+            public void lose_when_placing_outside_borders() {
+                Player.Grid grid = new Player.Grid(4, 1);
+                grid.parseLine(0, ".");
+                grid.parseLine(1, "0");
+                grid.parseLine(2, "1");
+                grid.parseLine(3, "1");
+
+                Player.Block block = new Player.Block(2, 2);
+
+                Player.ScoreEvaluation score = grid.place(block, 0);
+
+                assertThat(score.getNextState()).isNull();
+                assertThat(score.getScore()).isEqualTo(Integer.MIN_VALUE);
+            }
+        }
+
+        public class GamePlannerTest {
+
+            @Test
+            public void returns_empty_incomplete_list_when_no_solution_is_possible() {
+                Player.Grid grid = new Player.Grid(4, 3);
+                grid.parseLine(0, "...");
+                grid.parseLine(1, "00.");
+                grid.parseLine(2, "000");
+                grid.parseLine(3, "000");
+
+                List<Player.Block> incoming = Lists.newArrayList(new Player.Block(2, 2), new Player.Block(2, 2));
+
+                List<Player.Action> actions = Player.GamePlanner.run(grid, incoming);
+
+                //How to check it?
+                assertThat(actions).hasSize(1);
+            }
+
+            @Test
+            public void place_blocks_together_when_only_four_blocks_of_same_color_is_provided() {
+                Player.Grid grid = new Player.Grid(4, 3);
+                grid.parseLine(0, "...");
+                grid.parseLine(1, "...");
+                grid.parseLine(2, "...");
+                grid.parseLine(3, "...");
+
+                List<Player.Block> incoming = Lists.newArrayList(new Player.Block(2, 2), new Player.Block(2, 2));
+
+                List<Player.Action> actions = Player.GamePlanner.run(grid, incoming);
+
+                //How to check it?
+                System.out.println(actions);
+            }
+
+            @Test
+            public void do_not_follow_end_game_scenario() {
+                Player.Grid grid = new Player.Grid(4, 3);
+                grid.parseLine(0, "...");
+                grid.parseLine(1, "00.");
+                grid.parseLine(2, "00.");
+                grid.parseLine(3, "00.");
+
+                List<Player.Block> incoming = Lists.newArrayList(new Player.Block(2, 2), new Player.Block(2, 2));
+
+                List<Player.Action> actions = Player.GamePlanner.run(grid, incoming);
+
+                //How to check it?
+                System.out.println(actions);
             }
         }
     }

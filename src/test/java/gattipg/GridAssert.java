@@ -1,3 +1,5 @@
+package gattipg;
+
 import org.assertj.core.api.AbstractAssert;
 
 class GridAssert extends AbstractAssert<GridAssert, Player.Grid> {
@@ -20,7 +22,7 @@ class GridAssert extends AbstractAssert<GridAssert, Player.Grid> {
         isNotNull();
 
         for (int i = 0; i < lines.length; i++) {
-            for (int j = 0; j < actual.numberOfColumns; j++) {
+            for (int j = 0; j < actual.getNumberOfColumns(); j++) {
                 char expected = lines[i].charAt(j);
                 Player.Field field = actual.getField(i, j);
                 if (field.getValue() != expected) {
@@ -40,7 +42,7 @@ class GridAssert extends AbstractAssert<GridAssert, Player.Grid> {
         builder.append("but found\n");
 
         for (int i = 0; i < lines.length; i++) {
-            for (int j = 0; j < grid.numberOfColumns; j++) {
+            for (int j = 0; j < grid.getNumberOfColumns(); j++) {
                 builder.append(grid.getField(i, j));
             }
             builder.append('\n');
