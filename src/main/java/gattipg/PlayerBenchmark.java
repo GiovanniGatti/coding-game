@@ -1,5 +1,6 @@
 package gattipg;
 
+import gattipg.Player.Block;
 import gattipg.Player.GamePlanner;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -24,7 +25,7 @@ public class PlayerBenchmark {
 
         Player.Grid grid;
 
-        List<Player.Block> incoming;
+        List<Block> incoming;
 
         @Setup
         public void setup() {
@@ -42,16 +43,14 @@ public class PlayerBenchmark {
             grid.parseLine(10, "......");
             grid.parseLine(11, "......");
 
+            //~100ms
+            incoming = Arrays.asList(
+                    new Block(1, 2), new Block(4, 2),
+                    new Block(3, 4));
+
 //            incoming = Arrays.asList(
 //                    new Player.Block(1, 1), new Player.Block(2, 2),
-//                    new Player.Block(3, 3), new Player.Block(2, 2),
-//                    new Player.Block(4, 4), new Player.Block(1, 1),
-//                    new Player.Block(1, 1), new Player.Block(3, 3));
-
-            incoming = Arrays.asList(
-                    new Player.Block(1, 1), new Player.Block(2, 2),
-                    new Player.Block(3, 3), new Player.Block(2, 2),
-                    new Player.Block(4, 4));
+//                    new Player.Block(3, 3), new Player.Block(3, 3));
         }
     }
 

@@ -67,6 +67,54 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 assertThat(grid.getCells('1')).containsExactlyInAnyOrder(new Player.Cell(1, 1));
                 assertThat(grid.getCells('2')).containsExactlyInAnyOrder(new Player.Cell(2, 1), new Player.Cell(2, 2));
             }
+
+            @Test
+            public void do_not_recommend_to_rotate_block_before_left_border() {
+                Player.Grid grid = new Player.Grid(3, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, "....");
+                grid.parseLine(2, "....");
+
+                List<Integer> rotations = grid.possibleRotations(new Block(1, 2), 0);
+
+                assertThat(rotations).containsExactlyInAnyOrder(0, 1, 3);
+            }
+
+            @Test
+            public void do_not_recommend_to_rotate_block_after_right_border() {
+                Player.Grid grid = new Player.Grid(3, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, "....");
+                grid.parseLine(2, "....");
+
+                List<Integer> rotations = grid.possibleRotations(new Block(1, 2), 3);
+
+                assertThat(rotations).containsExactlyInAnyOrder(1, 2, 3);
+            }
+
+            @Test
+            public void recommend_any_rotation_when_inside_grid() {
+                Player.Grid grid = new Player.Grid(3, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, "....");
+                grid.parseLine(2, "....");
+
+                List<Integer> rotations = grid.possibleRotations(new Block(1, 2), 2);
+
+                assertThat(rotations).containsExactlyInAnyOrder(0, 1, 2, 3);
+            }
+
+            @Test
+            public void do_not_recommend_all_rotations_when_blocks_of_same_color() {
+                Player.Grid grid = new Player.Grid(3, 4);
+                grid.parseLine(0, "....");
+                grid.parseLine(1, "....");
+                grid.parseLine(2, "....");
+
+                List<Integer> rotations = grid.possibleRotations(new Block(2, 2), 2);
+
+                assertThat(rotations).containsExactlyInAnyOrder(0, 1);
+            }
         }
 
         @Test
@@ -543,22 +591,6 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
         }
 
         public class GamePlannerTest {
-
-            @Test
-            public void returns_empty_incomplete_list_when_no_solution_is_possible() {
-                Player.Grid grid = new Player.Grid(4, 3);
-                grid.parseLine(0, "...");
-                grid.parseLine(1, "00.");
-                grid.parseLine(2, "000");
-                grid.parseLine(3, "000");
-
-                List<Block> incoming = Lists.newArrayList(new Block(2, 2), new Block(2, 2));
-
-                List<Player.Action> actions = Player.GamePlanner.run(grid, incoming);
-
-                //How to check it?
-                assertThat(actions).hasSize(1);
-            }
 
             @Test
             public void place_blocks_together_when_only_four_blocks_of_same_color_is_provided() {

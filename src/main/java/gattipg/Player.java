@@ -44,15 +44,19 @@ final class Player {
                 String row = in.next();
             }
 
-            //Performance issues when computing more than 3 blocks
-            List<Action> actions = GamePlanner.run(grid, next.subList(0, 4));
+            //Performance issues when computing more than 2 blocks
+            List<Action> actions = GamePlanner.run(grid, next.subList(0, 2));
 
             //Game is lost, do anything...
             if (actions.isEmpty()) {
-                System.out.println("0");
+                System.out.println("0 0");
             }
 
-            System.out.println(String.valueOf(actions.get(0).getPosition()));
+            Action action = actions.get(0);
+
+            System.out.println(
+                    String.valueOf(action.getPosition()) + " "
+                            + String.valueOf(action.getRotation()));
         }
     }
 
@@ -67,18 +71,22 @@ final class Player {
 
             List<List<Action>> simulations = new ArrayList<>();
 
+            Block block = incomingBlocks.get(0);
+
             for (int j = 0; j < currentState.getNumberOfColumns(); j++) {
-                ScoreEvaluation evaluation = currentState.place(incomingBlocks.get(0), j, 3);
+                for (int rot : currentState.possibleRotations(block, j)) {
+                    ScoreEvaluation evaluation = currentState.place(block, j, rot);
 
-                if (evaluation.getScore() != Integer.MIN_VALUE) {
+                    if (evaluation.getScore() != Integer.MIN_VALUE) {
 
-                    List<Action> bestOutcome =
-                            run(evaluation.getNextState(),
-                                    incomingBlocks.subList(1, incomingBlocks.size()));
+                        List<Action> bestOutcome =
+                                run(evaluation.getNextState(),
+                                        incomingBlocks.subList(1, incomingBlocks.size()));
 
-                    bestOutcome.add(0, new Action(incomingBlocks.get(0), j, evaluation));
+                        bestOutcome.add(0, new Action(block, j, rot, evaluation));
 
-                    simulations.add(bestOutcome);
+                        simulations.add(bestOutcome);
+                    }
                 }
             }
 
@@ -105,10 +113,12 @@ final class Player {
     static class Action {
         private final Block block;
         private final int position;
+        private final int rotation;
         private final ScoreEvaluation evaluation;
 
-        Action(Block block, int position, ScoreEvaluation evaluation) {
+        Action(Block block, int position, int rotation, ScoreEvaluation evaluation) {
             this.block = block;
+            this.rotation = rotation;
             this.evaluation = evaluation;
             this.position = position;
         }
@@ -119,6 +129,10 @@ final class Player {
 
         int getPosition() {
             return position;
+        }
+
+        int getRotation() {
+            return rotation;
         }
 
         @Override
@@ -446,6 +460,22 @@ final class Player {
 
         int getNumberOfLines() {
             return numberOfLines;
+        }
+
+        List<Integer> possibleRotations(Block b, int pos) {
+            if (pos == 0) {
+                return Arrays.asList(0, 1, 3);
+            }
+
+            if (pos == getNumberOfColumns() - 1) {
+                return Arrays.asList(1, 2, 3);
+            }
+
+            if (b.getA() == b.getB()) {
+                return Arrays.asList(0, 1);
+            }
+
+            return Arrays.asList(0, 1, 2, 3);
         }
 
         private static Map<Cell, Field> deepCopy(Map<Cell, Field> actual) {
