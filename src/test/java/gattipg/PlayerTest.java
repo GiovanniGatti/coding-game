@@ -260,7 +260,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(1, 1);
 
-                Player.ScoreEvaluation score = grid.place(block, 0);
+                Player.ScoreEvaluation score = grid.place(block, 0, 3);
 
                 assertThat(score.getNextState()).isEqualTo(
                         "....",
@@ -277,7 +277,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(2, 2);
 
-                Player.ScoreEvaluation score = grid.place(block, 1);
+                Player.ScoreEvaluation score = grid.place(block, 1, 3);
 
                 assertThat(score.getNextState()).isEqualTo(
                         "....",
@@ -295,7 +295,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(2, 2);
 
-                Player.ScoreEvaluation score = grid.place(block, 0);
+                Player.ScoreEvaluation score = grid.place(block, 0, 3);
 
                 assertThat(score.getNextState()).isEqualTo(
                         ".",
@@ -312,7 +312,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(2, 2);
 
-                Player.ScoreEvaluation score = grid.place(block, 0);
+                Player.ScoreEvaluation score = grid.place(block, 0, 3);
 
                 assertThat(score.getNextState()).isEqualTo(
                         "....",
@@ -329,7 +329,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(2, 2);
 
-                Player.ScoreEvaluation score = grid.place(block, 1);
+                Player.ScoreEvaluation score = grid.place(block, 1, 3);
 
                 assertThat(score.getNextState()).isEqualTo(
                         "....",
@@ -348,7 +348,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(2, 2);
 
-                Player.ScoreEvaluation score = grid.place(block, 2);
+                Player.ScoreEvaluation score = grid.place(block, 2, 3);
 
                 assertThat(score.getNextState()).isEqualTo(
                         "....",
@@ -367,7 +367,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(2, 2);
 
-                Player.ScoreEvaluation score = grid.place(block, 1);
+                Player.ScoreEvaluation score = grid.place(block, 1, 3);
 
                 assertThat(score.getNextState()).isEqualTo(
                         "....",
@@ -386,7 +386,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(2, 2);
 
-                Player.ScoreEvaluation score = grid.place(block, 2);
+                Player.ScoreEvaluation score = grid.place(block, 2, 3);
 
                 assertThat(score.getNextState()).isEqualTo(
                         "....",
@@ -405,7 +405,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
 
                 Block block = new Block(2, 2);
 
-                Player.ScoreEvaluation score = grid.place(block, 0);
+                Player.ScoreEvaluation score = grid.place(block, 0, 3);
 
                 assertThat(score.getNextState()).isNull();
                 assertThat(score.getScore()).isEqualTo(Integer.MIN_VALUE);

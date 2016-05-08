@@ -68,7 +68,7 @@ final class Player {
             List<List<Action>> simulations = new ArrayList<>();
 
             for (int j = 0; j < currentState.getNumberOfColumns(); j++) {
-                ScoreEvaluation evaluation = currentState.place(incomingBlocks.get(0), j);
+                ScoreEvaluation evaluation = currentState.place(incomingBlocks.get(0), j, 3);
 
                 if (evaluation.getScore() != Integer.MIN_VALUE) {
 
@@ -229,7 +229,7 @@ final class Player {
             return new Cell(numberOfLines - 1, column);
         }
 
-        ScoreEvaluation place(Block block, int pos) {
+        ScoreEvaluation place(Block block, int pos, int rot) {
             Grid next = new Grid(this);
 
             Cell lower = next.nextAvailableCell(pos);
