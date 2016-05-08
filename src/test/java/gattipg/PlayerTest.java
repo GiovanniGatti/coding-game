@@ -410,6 +410,136 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 assertThat(score.getNextState()).isNull();
                 assertThat(score.getScore()).isEqualTo(Integer.MIN_VALUE);
             }
+
+            @Test
+            public void place_rotated_to_left() {
+                Player.Grid grid = new Player.Grid(3, 2);
+                grid.parseLine(0, "..");
+                grid.parseLine(1, "..");
+                grid.parseLine(2, "..");
+
+                Block block = new Block(2, 1);
+
+                Player.ScoreEvaluation score = grid.place(block, 0, 0);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "..",
+                        "..",
+                        "21");
+            }
+
+            @Test
+            public void place_rotated_to_right() {
+                Player.Grid grid = new Player.Grid(3, 2);
+                grid.parseLine(0, "..");
+                grid.parseLine(1, "..");
+                grid.parseLine(2, "..");
+
+                Block block = new Block(2, 1);
+
+                Player.ScoreEvaluation score = grid.place(block, 1, 2);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "..",
+                        "..",
+                        "12");
+            }
+
+            @Test
+            public void place_normally() {
+                Player.Grid grid = new Player.Grid(3, 1);
+                grid.parseLine(0, ".");
+                grid.parseLine(1, ".");
+                grid.parseLine(2, ".");
+
+                Block block = new Block(2, 1);
+
+                Player.ScoreEvaluation score = grid.place(block, 0, 3);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        ".",
+                        "2",
+                        "1");
+            }
+
+            @Test
+            public void place_rotated_vertically() {
+                Player.Grid grid = new Player.Grid(3, 1);
+                grid.parseLine(0, ".");
+                grid.parseLine(1, ".");
+                grid.parseLine(2, ".");
+
+                Block block = new Block(2, 1);
+
+                Player.ScoreEvaluation score = grid.place(block, 0, 1);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        ".",
+                        "1",
+                        "2");
+            }
+
+            @Test
+            public void let_right_attached_cell_fall_to_highest_position_on_right_side() {
+                Player.Grid grid = new Player.Grid(3, 3);
+                grid.parseLine(0, "...");
+                grid.parseLine(1, "...");
+                grid.parseLine(2, "0..");
+
+                Block block = new Block(2, 1);
+
+                Player.ScoreEvaluation score = grid.place(block, 0, 0);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "...",
+                        "2..",
+                        "01.");
+            }
+
+            @Test
+            public void let_left_attached_cell_fall_to_highest_position_on_right_side() {
+                Player.Grid grid = new Player.Grid(3, 3);
+                grid.parseLine(0, "...");
+                grid.parseLine(1, "...");
+                grid.parseLine(2, ".0.");
+
+                Block block = new Block(2, 1);
+
+                Player.ScoreEvaluation score = grid.place(block, 1, 2);
+
+                assertThat(score.getNextState()).isEqualTo(
+                        "...",
+                        ".2.",
+                        "10.");
+            }
+
+            @Test
+            public void throw_ISE_if_placed_outside_left_border() {
+                Player.Grid grid = new Player.Grid(3, 2);
+                grid.parseLine(0, "..");
+                grid.parseLine(1, "..");
+                grid.parseLine(2, "..");
+
+                Block block = new Block(2, 1);
+
+                assertThatThrownBy(() -> grid.place(block, 0, 2))
+                        .isInstanceOf(IllegalStateException.class)
+                        .hasMessageContaining("Cannot place attached cell at pos=-1");
+            }
+
+            @Test
+            public void throw_ISE_if_placed_outside_right_border() {
+                Player.Grid grid = new Player.Grid(3, 2);
+                grid.parseLine(0, "..");
+                grid.parseLine(1, "..");
+                grid.parseLine(2, "..");
+
+                Block block = new Block(2, 1);
+
+                assertThatThrownBy(() -> grid.place(block, 1, 0))
+                        .isInstanceOf(IllegalStateException.class)
+                        .hasMessageContaining("Cannot place attached cell at pos=2");
+            }
         }
 
         public class GamePlannerTest {

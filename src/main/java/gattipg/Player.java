@@ -232,29 +232,56 @@ final class Player {
         ScoreEvaluation place(Block block, int pos, int rot) {
             Grid next = new Grid(this);
 
-            Cell lower = next.nextAvailableCell(pos);
-            Field lowerField = grid.get(lower);
+            Cell target = next.nextAvailableCell(pos);
+            Field targetField = grid.get(target);
 
-            Cell upper = new Cell(lower.getRow() - 1, lower.getColumn());
-            Field upperField = grid.get(upper);
+            Cell attached;
+            switch (rot) {
+                case 0:
+                    int col = target.getColumn() + 1;
+                    if (col >= numberOfColumns) {
+                        throw new IllegalStateException("Cannot place attached cell at pos=" + col);
+                    }
+                    attached = next.nextAvailableCell(col);
+                    break;
+                case 1:
+                    attached = new Cell(target.getRow() - 1, target.getColumn());
+                    break;
+                case 2:
+                    col = target.getColumn() - 1;
+                    if (col < 0) {
+                        throw new IllegalStateException("Cannot place attached cell at pos=" + col);
+                    }
+                    attached = next.nextAvailableCell(col);
+                    break;
+                case 3:
+                    attached = target;
+                    target = new Cell(attached.getRow() - 1, attached.getColumn());
+                    targetField = grid.get(target);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown rotation: " + rot);
+            }
 
-            if (!lower.isInsideGrid(this) || !upper.isInsideGrid(this)) {
+            Field attachedField = grid.get(attached);
+
+            if (!target.isInsideGrid(this) || !attached.isInsideGrid(this)) {
                 return new ScoreEvaluation(null, Integer.MIN_VALUE);
             }
 
             Field a = Field.of(block.getA());
             Field b = Field.of(block.getB());
 
-            next.grid.put(lower, b);
-            next.grid.put(upper, a);
+            next.grid.put(target, a);
+            next.grid.put(attached, b);
 
             next.mirrorGrid.putIfAbsent(b, new HashSet<>());
-            next.mirrorGrid.get(lowerField).remove(lower);
-            next.mirrorGrid.get(b).add(lower);
+            next.mirrorGrid.get(targetField).remove(attached);
+            next.mirrorGrid.get(b).add(attached);
 
             next.mirrorGrid.putIfAbsent(a, new HashSet<>());
-            next.mirrorGrid.get(upperField).remove(upper);
-            next.mirrorGrid.get(a).add(upper);
+            next.mirrorGrid.get(attachedField).remove(target);
+            next.mirrorGrid.get(a).add(target);
 
             int score = group(next);
 
