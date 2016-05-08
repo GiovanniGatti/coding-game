@@ -33,15 +33,15 @@ final class Player {
                 next.add(new Block(colorA, colorB));
             }
 
-            // Opponent grid
-            for (int i = 0; i < 12; i++) {
-                String row = in.next();
-            }
-
             // My current grid
             for (int i = 0; i < 12; i++) {
                 String row = in.next();
                 grid.parseLine(i, row);
+            }
+
+            // Opponent grid
+            for (int i = 0; i < 12; i++) {
+                String row = in.next();
             }
 
             //Performance issues when computing more than 3 blocks
@@ -76,7 +76,7 @@ final class Player {
                             run(evaluation.getNextState(),
                                     incomingBlocks.subList(1, incomingBlocks.size()));
 
-                    bestOutcome.add(0, new Action(evaluation, j));
+                    bestOutcome.add(0, new Action(incomingBlocks.get(0), j, evaluation));
 
                     simulations.add(bestOutcome);
                 }
@@ -103,10 +103,12 @@ final class Player {
     }
 
     static class Action {
-        private final ScoreEvaluation evaluation;
+        private final Block block;
         private final int position;
+        private final ScoreEvaluation evaluation;
 
-        Action(ScoreEvaluation evaluation, int position) {
+        Action(Block block, int position, ScoreEvaluation evaluation) {
+            this.block = block;
             this.evaluation = evaluation;
             this.position = position;
         }
@@ -121,7 +123,7 @@ final class Player {
 
         @Override
         public String toString() {
-            return String.valueOf(position);
+            return block + " -> " + String.valueOf(position);
         }
     }
 
@@ -157,6 +159,11 @@ final class Player {
 
         int getB() {
             return b;
+        }
+
+        @Override
+        public String toString() {
+            return "(" + a + ", " + b + ')';
         }
     }
 

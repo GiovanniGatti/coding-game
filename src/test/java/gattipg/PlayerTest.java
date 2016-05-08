@@ -1,6 +1,7 @@
 package gattipg;
 
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
+import gattipg.Player.Block;
 import org.assertj.core.api.WithAssertions;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
@@ -257,7 +258,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(1, "....");
                 grid.parseLine(2, ".222");
 
-                Player.Block block = new Player.Block(1, 1);
+                Block block = new Block(1, 1);
 
                 Player.ScoreEvaluation score = grid.place(block, 0);
 
@@ -274,7 +275,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(1, "..2.");
                 grid.parseLine(2, "..2.");
 
-                Player.Block block = new Player.Block(2, 2);
+                Block block = new Block(2, 2);
 
                 Player.ScoreEvaluation score = grid.place(block, 1);
 
@@ -292,7 +293,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, "2");
                 grid.parseLine(3, "2");
 
-                Player.Block block = new Player.Block(2, 2);
+                Block block = new Block(2, 2);
 
                 Player.ScoreEvaluation score = grid.place(block, 0);
 
@@ -309,7 +310,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(0, "....");
                 grid.parseLine(1, ".222");
 
-                Player.Block block = new Player.Block(2, 2);
+                Block block = new Block(2, 2);
 
                 Player.ScoreEvaluation score = grid.place(block, 0);
 
@@ -326,7 +327,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, "..2.");
                 grid.parseLine(3, "..1.");
 
-                Player.Block block = new Player.Block(2, 2);
+                Block block = new Block(2, 2);
 
                 Player.ScoreEvaluation score = grid.place(block, 1);
 
@@ -345,7 +346,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, ".2.2");
                 grid.parseLine(3, ".121");
 
-                Player.Block block = new Player.Block(2, 2);
+                Block block = new Block(2, 2);
 
                 Player.ScoreEvaluation score = grid.place(block, 2);
 
@@ -364,7 +365,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, "0.20");
                 grid.parseLine(3, "0.00");
 
-                Player.Block block = new Player.Block(2, 2);
+                Block block = new Block(2, 2);
 
                 Player.ScoreEvaluation score = grid.place(block, 1);
 
@@ -383,7 +384,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, ".2..");
                 grid.parseLine(3, "1211");
 
-                Player.Block block = new Player.Block(2, 2);
+                Block block = new Block(2, 2);
 
                 Player.ScoreEvaluation score = grid.place(block, 2);
 
@@ -402,7 +403,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, "1");
                 grid.parseLine(3, "1");
 
-                Player.Block block = new Player.Block(2, 2);
+                Block block = new Block(2, 2);
 
                 Player.ScoreEvaluation score = grid.place(block, 0);
 
@@ -421,7 +422,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, "000");
                 grid.parseLine(3, "000");
 
-                List<Player.Block> incoming = Lists.newArrayList(new Player.Block(2, 2), new Player.Block(2, 2));
+                List<Block> incoming = Lists.newArrayList(new Block(2, 2), new Block(2, 2));
 
                 List<Player.Action> actions = Player.GamePlanner.run(grid, incoming);
 
@@ -437,7 +438,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, "...");
                 grid.parseLine(3, "...");
 
-                List<Player.Block> incoming = Lists.newArrayList(new Player.Block(2, 2), new Player.Block(2, 2));
+                List<Block> incoming = Lists.newArrayList(new Block(2, 2), new Block(2, 2));
 
                 List<Player.Action> actions = Player.GamePlanner.run(grid, incoming);
 
@@ -453,7 +454,7 @@ public class PlayerTest implements WithAssertions, GridAssert.WithTableAssertion
                 grid.parseLine(2, "00.");
                 grid.parseLine(3, "00.");
 
-                List<Player.Block> incoming = Lists.newArrayList(new Player.Block(2, 2), new Player.Block(2, 2));
+                List<Block> incoming = Lists.newArrayList(new Block(2, 2), new Block(2, 2));
 
                 List<Player.Action> actions = Player.GamePlanner.run(grid, incoming);
 
