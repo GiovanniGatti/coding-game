@@ -1,5 +1,6 @@
 # coding-game
 
+
  	The Goal
 
 Defeat your opponent by grouping colored blocks.
